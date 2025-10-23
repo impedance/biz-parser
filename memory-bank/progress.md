@@ -16,3 +16,14 @@
 ## Risks & Watch Items
 - Dictionary outputs omit the separator field even for custom delimiters—ensure downstream models do not assume it exists.
 - List marker metadata beyond numbering (`kind`, bullet symbol) is not yet represented in fixtures; revisit if later requirements demand it.
+
+## Тестовый план (2025-10-23)
+- Сверить существующие фикстуры с разделами `requirements.pdf` и зафиксировать пробелы (nested `o`-маркер, смешанные списки, контент внутри пунктов).
+- Доработать набор входов/выходов для отсутствующих позитивных кейсов и расширить `tests/fixtures` негативными примерами (незакрытые теги, мусорные строки в списках).
+- Настроить e2e- и unit-тесты: snapshot по каждой паре текст/JSON, отдельные проверки токенизатора и диагностики ошибок.
+- Обеспечить отчётливые сообщения об ошибках (линия, тип проблемы) и включить их в тесты на негативные сценарии.
+
+## Следующие шаги (2025-10-23)
+1. Утвердить формат диагностик и закрыть открытый вопрос по метаданным списков (`memory-bank/activeContext.md:15`).
+2. Завести тестовый раннер (Vitest/Jest) и подключить имеющиеся фикстуры как snapshot-тесты.
+3. Сформировать backlog edge-кейсов (например, вложенные `<dict>` внутри списков) и добавлять их в `tests/fixtures` до начала реализации парсера.
