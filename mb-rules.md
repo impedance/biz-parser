@@ -1,4 +1,4 @@
-# Cline's Memory Bank
+# Agent's Memory Bank
 
 Agent memory resets completely between sessions. This isn't a limitation - it's what drives agent to maintain perfect documentation. After each reset, agent rely ENTIRELY on Memory Bank to understand the project and continue work effectively. agent MUST read ALL memory bank files at the start of EVERY task - this is not optional.
 
