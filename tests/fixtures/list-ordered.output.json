@@ -1,0 +1,20 @@
+{
+  "kind": "block",
+  "body": [
+    {
+      "kind": "list",
+      "items": [
+        {
+          "kind": "block",
+          "number": "1.",
+          "head": "First"
+        },
+        {
+          "kind": "block",
+          "number": "2.",
+          "head": "Second"
+        }
+      ]
+    }
+  ]
+}

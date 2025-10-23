@@ -1,0 +1,13 @@
+{
+  "kind": "block",
+  "body": [
+    {
+      "kind": "dict",
+      "items": {
+        "Key One": "Value One",
+        "Key Two": "Value Two",
+        "Key Three": "Value Three"
+      }
+    }
+  ]
+}

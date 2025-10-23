@@ -1,0 +1,6 @@
+<list kind="*">
+* First
+o Subitem
+* Second
+* Third
+</list>

@@ -1,0 +1,37 @@
+{
+  "kind": "block",
+  "body": [
+    {
+      "kind": "list",
+      "items": [
+        {
+          "kind": "block",
+          "number": "1.",
+          "head": "First"
+        },
+        {
+          "kind": "block",
+          "number": "2.",
+          "head": "Second",
+          "body": [
+            {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "block",
+                  "number": "2.1.",
+                  "head": "Subitem 1"
+                },
+                {
+                  "kind": "block",
+                  "number": "2.2.",
+                  "head": "Subitem 2"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

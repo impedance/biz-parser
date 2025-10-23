@@ -1,0 +1,42 @@
+{
+  "kind": "block",
+  "body": [
+    {
+      "kind": "list",
+      "items": [
+        {
+          "kind": "block",
+          "number": "1.",
+          "head": "Beginning"
+        },
+        {
+          "kind": "block",
+          "number": "2.",
+          "head": "Main",
+          "body": [
+            {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "block",
+                  "number": "*",
+                  "head": "Bullet 1"
+                },
+                {
+                  "kind": "block",
+                  "number": "*",
+                  "head": "Bullet 2"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "block",
+          "number": "3.",
+          "head": "Ending"
+        }
+      ]
+    }
+  ]
+}

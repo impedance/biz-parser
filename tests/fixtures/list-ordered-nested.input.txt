@@ -1,0 +1,8 @@
+<list kind=".">
+1. First
+
+2. Second
+
+2.1. Subitem 1
+2.2. Subitem 2
+</list>

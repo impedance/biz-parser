@@ -1,0 +1,5 @@
+<list kind="*">
+* First
+* Second
+* Third
+</list>

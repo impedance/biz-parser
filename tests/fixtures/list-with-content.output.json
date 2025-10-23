@@ -1,0 +1,33 @@
+{
+  "kind": "block",
+  "body": [
+    {
+      "kind": "list",
+      "items": [
+        {
+          "kind": "block",
+          "number": "1.",
+          "head": "First",
+          "body": [
+            "First body"
+          ]
+        },
+        {
+          "kind": "block",
+          "number": "2.",
+          "head": "Second",
+          "body": [
+            "Some more text",
+            {
+              "kind": "dict",
+              "items": {
+                "Key": "Value",
+                "Another Key": "Another Value"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
