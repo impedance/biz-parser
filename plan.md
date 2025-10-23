@@ -1,327 +1,95 @@
-Конечно — вот документ в формате Markdown с полным планом реализации парсера на TypeScript:
-
-# План реализации парсера
-
-## Коротко о задаче  
-Мы должны реализовать модуль, который принимает на вход текстовый документ в формате, описанном в спецификации (например: блоки `<block>`, заголовки `<head>`, списки `<list>`, словари `<dict>`, вложенности и т.д.).  
-Результатом должны быть структуры данных (модели) — например `Block`, `ListBlock`, `Dictionary` — и их сериализация (или непосредственное представление) как JSON, соответствующее примерам в спецификации.  
-Ключевые задачи:  
-- Построить модель данных (типизацию) в TypeScript.  
-- Написать парсер, который анализирует текст, распознаёт конструкции и строит дерево этих моделей.  
-- Обеспечить хорошую структурность, поддержку вложенности, списков, словарей, комбинированных случаев, а также устойчивость к ошибкам.  
-- Написать тесты, документацию, и обеспечить код, пригодный к поддержке в долгосрочной перспективе.
-
----
-
-## Этап 1: Подготовка и архитектура  
-**Шаг 1.1 — Детальный анализ спецификации**  
-- Прочитать полностью спецификацию (включая все примеры: пустой текст, простой текст, head, block, dict, list, вложенные списки).  
-- Выписать все конструкции:  
-  - `<head> … </head>` — заголовок блока  
-  - `<block> … </block>` — вложенный блок  
-  - `<dict sep="X"> … </dict>` — словарь с разделителем  
-  - `<list kind="K"> … </list>` — список с видом (`.` или `*`) и вложенными уровнями  
-  - обычный текст строки — как элемент тела блока  
-- Определить все граничные случаи, которые указаны в спецификации (например пустой текст → пустой блок, списки с вложенностью, список + тело + словарь).
-
-**Шаг 1.2 — Определение модели данных в TypeScript**  
-- На основе спецификации определить интерфейсы/типы:  
-  ```ts
-  type ContentNode = string | Block | ListBlock | Dictionary;
-
-  interface Dictionary {
-    kind: "dict";
-    items: Record<string, string>;
-  }
-
-  interface Block {
-    kind: "block";
-    number?: string;
-    head?: string;
-    body?: ContentNode[];
-  }
-
-  interface ListBlock {
-    kind: "list";
-    items: Block[];
-  }
-
-
-Решить: корневой документ — просто Block (без number) или отдельный Document тип? Как показывает пример: пустой документ → { "kind": "block" }.
-
-Подумать об утилитах: фабрика моделей, проверка invariants (например: kind всегда задан).
-
-Шаг 1.3 — Архитектура парсера
-
-Определить, как реализовывать парсинг:
-
-Чтение входного текста → разбивка на лексические единицы (строки, теги начала/конца)
-
-Построение дерева — рекурсивный парсер: например, функция parseBlock(lines: string[], startIndex: number): { node: Block, nextIndex: number }
-
-Для списков: специальная функция parseList(lines: string[], kind: "." | "*", startIndex: number): { node: ListBlock, nextIndex: number }
-
-Для словарей: parseDict(lines: string[], sep: string, startIndex: number): { node: Dictionary, nextIndex: number }
-
-Решить стратегию вложенности: блоки могут быть вложены, списки внутри блоков, словари внутри блоков или списков.
-
-Определить API: возможно функция parseDocument(text: string): Block.
-
-Шаг 1.4 — Настройка проекта
-
-Создать репозиторий (например bizdocument-parser).
-
-Инициализировать package.json, установить TypeScript, настроить tsconfig.json. Например:
-
-{
-  "compilerOptions": {
-    "target": "ES2019",
-    "module": "commonjs",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
-}
-
-
-Настроить инструменты разработки: ESLint, Prettier, Jest (или другой тест-фреймворк) для тестов.
-
-Подготовить директории: src/, tests/.
-
-Шаг 1.5 — Подготовка тестового набора
-
-Скопировать из спецификации примеры (пустой текст, простой текст, head, block, dict, list, вложенные списки).
-
-Создать тестовые файлы, например test/kata1_empty.ts, test/kata1_body.ts, etc.
-
-Определить формат проверки: входной текст → ожидаемый JSON (или сравнение моделей).
-
-Настроить автоматические тесты.
-
-Этап 2: Реализация базового парсера
-
-Шаг 2.1 — Модели данных (реализация)
-
-В src/models.ts реализовать интерфейсы/типы данных (Block, ListBlock, Dictionary, ContentNode).
-
-Добавить функции для сериализации (например toJSON() или просто использование JSON.stringify).
-
-Шаг 2.2 — Чтение текста и разбивка на строки
-
-В src/parser.ts создать функцию tokenize(text: string): string[] — разбивает текст по строкам, убирает пустые строки (спецификация: “skip empty lines”).
-
-Возможно — trim пробелов, сохранить оригинальные строки.
-
-Шаг 2.3 — Функция parseDocument
-
-Реализовать function parseDocument(text: string): Block — разбивает текст, вызывает parseBlock с корневым контекстом.
-
-Корневой блок: kind = "block", без number, без head, body заполняется.
-
-Шаг 2.4 — Простой парсинг текстовых строк внутри блока
-
-В parseBlock, когда строка не соответствует тегу head, block, dict, list, будет считаться как текст и добавляться в body как строка.
-
-Поэтому сначала реализовать базовый вариант: только текст. Проверить через тест: «Body» пример.
-
-Шаг 2.5 — Обработка <head> внутри блока
-
-В parseBlock, обнаруживая строка <head>…</head> (или открывающий/закрывающий тег) — извлечь содержимое и установить head на текущем Block.
-
-После head, последующие строки до других конструкций считаются body.
-
-Написать тест «Head» пример.
-
-Шаг 2.6 — Обработка вложенных <block> тегов
-
-В parseBlock, если встретили строк <block> — вызвать рекурсивно parseBlock из следующей строки, до строки </block>.
-
-Добавить результат в body как Block.
-
-Обработать </block> закрытие.
-
-Написать тест: вложенный блок пример.
-
-Этап 3: Реализация словарей (<dict> … </dict>)
-
-Шаг 3.1 — Обнаружение <dict sep="X">
-
-В parseBlock, если строк соответствует <dict sep="S"> (рассчитать атрибут sep).
-
-Извлечь разделитель S (например ":", "-").
-
-Шаг 3.2 — Парсинг содержимого до </dict>
-
-Чтение строк до строки </dict>.
-
-Для каждой непустой строки внутри: key sep value. Если value отсутствует → "".
-
-Формирование объекта Dictionary с items: { [key: string]: string }.
-
-Добавление Dictionary в body текущего Block.
-
-Шаг 3.3 — Тестирование словаря
-
-Тест: словарь с : разделителем.
-
-Тест: словарь с - разделителем и пустым значением.
-
-Этап 4: Реализация списков (<list kind="…"> … </list>)
-
-Шаг 4.1 — Обнаружение списка
-
-В parseBlock, если строк соответствует <list kind="K"> с атрибут kind равным "." или "*".
-
-Шаг 4.2 — Парсинг элементов списка
-
-Чтение строк до </list>. Для каждой непустой строки:
-
-Если соответствует маркер: например 1. <text>, 2.1. <text> для упорядоченного списка; • <text> или * <text> для неупорядоченного.
-
-Извлечь number маркер (например "1.", "2.1.", "•").
-
-Извлечь head как остаток строки.
-
-Создать Block с kind = "block", number, head, и пока body пустой.
-
-Если после маркера идут строки, которые не начинаются новым маркером, считаем их body текущего Block.
-
-Шаг 4.3 — Обработка вложенных списков
-
-Если внутри списка элемента встретится другой <list> (тег) — рекурсивно вызвать parseList.
-
-Или: если маркер следующей линии соответствует вложенному уровню (например 2.1. после 2.) — решить как вложенный список или как часть body? Спецификация показывает вложенность.
-
-Шаг 4.4 — Формирование ListBlock
-
-После парсинга всех элементов списка, сформировать ListBlock { kind: "list", items: Block[] }.
-
-Добавить ListBlock в body текущего Block.
-
-Шаг 4.5 — Тестирование списков
-
-Тест: простой упорядоченный список.
-
-Тест: упорядоченный список с вложенностью.
-
-Тест: ненумерованный список (*), с вложенностью o.
-
-Тест: смешанный список (упорядоченный + внутри него ненумерованный).
-
-Этап 5: Интеграционные сложности и смешанные конструкции
-
-Шаг 5.1 — Обработка смешанных сценариев
-
-Пример: список, внутри которого элемент имеет body со строками + словарём.
-
-Убедиться, что после маркера списка дальше идут текстовые строки и тег <dict> → это body списка-элемента, а не новый элемент.
-
-Шаг 5.2 — Обработка вложенных блоков внутри блоков и списков
-
-Блоки <block> могут появляться внутри body списка, блоков и т.д. Нужно рекурсивно обрабатывать.
-
-Шаг 5.3 — Граничные случаи
-
-Пустой документ → { "kind": "block" }.
-
-Блок без head, без body.
-
-Тело, состоящее только из текста.
-
-Некорректные формы: тег открытия без закрытия — решить стратегию (ошибка или best-effort).
-
-Шаг 5.4 — Тестирование комплексных сценариев
-
-Комбинированный документ: head + текст + вложенный блок + список + словарь.
-
-Проверка JSON-вывода: типы, ключи, массив body и др.
-
-Этап 6: Сериализация и API
-
-Шаг 6.1 — Функция сериализации
-
-Добавить функцию toJson(block: Block): string или просто JSON.stringify(block), учитывая, что optional-поля должны быть опущены если не заданы.
-
-Убедиться, что вывод соответствует примерам спецификации (нет лишних полей).
-
-Шаг 6.2 — Экспорт функции в модуле
-
-В src/index.ts экспортировать основной метод: parseDocument(text: string): Block.
-
-Возможно: parseFromFile(path: string): Promise<Block>.
-
-Шаг 6.3 — Документация API
-
-Объяснить как использовать:
-
-import { parseDocument } from 'bizdocument-parser';
-
-const doc = parseDocument(inputText);
-console.log(JSON.stringify(doc, null, 2));
-
-
-Примеры входа → вывода.
-
-Шаг 6.4 — Настройка сборки
-
-Компиляция TypeScript в JavaScript (tsc), возможно с outDir = dist.
-
-Убедиться, что модуль можно подключить, включая типы (.d.ts файлы).
-
-Этап 7: Тестирование, CI, публикация
-
-Шаг 7.1 — Написание тестов
-
-Использовать Jest или другой фреймворк.
-
-Написать юнит-тесты for: tokenize, parseBlock, parseList, parseDict.
-
-Написать интеграционные тесты: полные документы → JSON.
-
-Шаг 7.2 — Настройка CI
-
-Настроить GitHub Actions (или другой CI) для: линтера (ESLint), проверки типов (tsc --noEmit), тестов (Jest).
-
-Шаг 7.3 — Документация и README
-
-Описание проекта, скриншоты/примеры, ограничения, как внести свой вклад.
-
-Шаг 7.4 — Версионирование и публикация
-
-В package.json установить версию, лицензия.
-
-Опционально: опубликовать на npm (если библиотека публичная).
-
-Шаг 7.5 — Поддержка изменений спецификации
-
-Добавить в README раздел “К расширению”: как добавить новую конструкцию, как изменить модель.
-
-Этап 8: Оптимизация и подготовка к производству
-
-Шаг 8.1 — Производительность
-
-Протестировать на больших документах (тысячах строк). Измерить время.
-
-При необходимости: переработать парсер для эффективного чтения (например, использовать index pointer вместо создания массивов строк, или streaming подход).
-
-Шаг 8.2 — Обработка ошибок и логирование
-
-Добавить классы ошибок: ParseError с информацией о строке.
-
-Убедиться, что неспособность распарсить не ломает всё приложение.
-
-Шаг 8.3 — Расширяемость
-
-Архитектура: сделать парсер модульным: разные “handlers” для блоков, списков, словарей. Поддержка плагинов.
-
-Шаг 8.4 — Документация внутренняя и поддержка
-
-Комментарии, typedefs для моделей.
-
-Обновление README при изменении спецификации.
-
-Шаг 8.5 — Обратная совместимость и миграция
-
-Если спецификация изменится (например, добавится новый тег <table>), обеспечить, чтобы существующий код мог поддерживать старое и новое.
+# BizDocument Parser Execution Plan
+
+This plan guides coding agents through building the BizDocument parser in alignment with the BizDocumentAI specification. It complements the PRD and operational rules in `AGENTS.md`.
+
+## 0. Canonical References
+- `requirements.pdf` — primary source of truth for the BizDocumentAI format (tags, nesting, and expected JSON). **Note:** PDF text extraction omits fenced code blocks; manually transcribe input/output samples before implementation.
+- `PRD.md` — product requirements distilled from the spec and program goals.
+- `AGENTS.md`, `agent-rules.md`, `mb-rules.md` — session protocol, AICODE tagging rules, and Memory Bank workflow.
+
+Always defer to `requirements.pdf` when conflicts arise.
+
+## 1. Session Ritual for Coding Agents
+1. Load `AGENTS.md`, `agent-rules.md`, `mb-rules.md`, and all Memory Bank files (create the bank if missing).
+2. Capture the working intent in the planning tool (unless the task is trivial per policy).
+3. Run targeted `rg` searches for existing AICODE comments relevant to the parser work.
+4. Update Memory Bank entries (`activeContext.md`, `progress.md`) with new insights or completed milestones.
+
+## 2. Phase Roadmap
+### Phase A — Spec Capture & Test Assets
+- Extract every example input/output pair from `requirements.pdf`. If tools miss code blocks, copy them manually into `tests/fixtures/`.
+- Create a consolidated reference document (`docs/spec-examples.md`) with the raw text and expected JSON for quick lookup.
+- Validate assumptions about whitespace handling (“strip and skip empty lines”), list markers, dictionary separators, and nesting by cross-checking with examples.
+
+### Phase B — Domain Model Alignment
+- Define TypeScript interfaces mirroring the spec:
+  - Root `Block` with optional `head`, `number`, and ordered `body`.
+  - `Dictionary` preserving separator and key/value ordering (use array of entries, not plain object, to allow duplicates and maintain order—verify against spec examples).
+  - `ListBlock` capturing kind/marker metadata and `Block` items.
+- Document invariants (e.g., `kind` discriminators, optional fields omitted when undefined).
+
+### Phase C — Parser Infrastructure
+- Normalise input (UTF-8, `\n` line endings) and implement a lightweight lexer/tokeniser that produces line records with line numbers, tag tokens, and raw content.
+- Establish a recursive-descent parser scaffold with context-aware functions:
+  - `parseDocument` → root block
+  - `parseBlock`
+  - `parseDictionary`
+  - `parseList`
+- Track parsing cursor, manage stacks for nested tags, and surface structured `ParseError` messages with line/column data.
+
+### Phase D — Feature Implementation Sequence
+1. **Plain Text & Heads**
+   - Support empty documents → `{ kind: "block" }`.
+   - Map paragraphs to `string` entries; collapse consecutive blank lines.
+   - Parse `<head>...</head>` into `block.head`.
+2. **Nested Blocks**
+   - Recognise `<block>` … `</block>` pairs; allow arbitrary depth and interleaving with other content types.
+3. **Dictionaries**
+   - Handle `<dict sep=":">` (default `:`) and overrides.
+   - Split on the first separator occurrence; allow empty values.
+   - Emit ordered arrays of `{ key, value }`.
+4. **Lists**
+   - Implement ordered (`kind="."`) and unordered (`kind="*"`/`"o"`) lists.
+   - Capture item numbers/head text per spec; support nested lists either via additional `<list>` blocks or marker conventions outlined in examples.
+   - Route non-marker lines inside a list to the current item’s `body`.
+5. **Mixed Content & Edge Cases**
+   - Ensure mixed sequences (text + dict + list within a block) preserve order.
+   - Confirm lists inside blocks and dictionaries inside list items parse correctly.
+
+For each step, add or update fixtures and automated tests before proceeding.
+
+### Phase E — Error Handling & Validation
+- Define `ParseError` with message, line, column, and optional context snippet.
+- Detect unmatched or misordered tags, malformed dictionary entries, and unsupported list markers.
+- Provide configurable strict vs. permissive modes if future requirements demand (log-only vs throw).
+
+### Phase F — Tooling, CI, Packaging
+- Project scaffolding: `package.json`, `tsconfig.json` with `strict: true`, ESLint + Prettier, test runner (Jest or Vitest).
+- Scripts: `build`, `test`, `lint`, `typecheck`, `spec:snapshots` (fixture runner), `validate:aicode`.
+- CI workflow invoking lint, type checks, tests.
+- Publishable build artefacts in `dist/` with declaration files.
+
+### Phase G — Documentation & Knowledge Continuity
+- Maintain Memory Bank (`activeContext.md`, `progress.md`) with milestone summaries, pitfalls, and open questions.
+- Update `README.md` with usage examples, format overview, error glossary, and contribution guide.
+- Document extension patterns (e.g., adding new tags) and any deliberate deviations from the spec.
+
+## 3. Deliverables Checklist
+- [ ] Complete fixture set mirroring every example in `requirements.pdf`.
+- [ ] Type definitions (`src/models.ts`) reviewed against spec JSON.
+- [ ] Parser modules with unit + integration tests for blocks, heads, dictionaries, lists, and mixed documents.
+- [ ] Error handling module with negative tests.
+- [ ] CI pipeline green (lint, type check, tests).
+- [ ] Developer documentation and Memory Bank updates merged.
+
+## 4. Risks & Mitigations
+- **Missing example data:** Manual transcription required; schedule time in Phase A.
+- **Ambiguous list nesting markers:** Prototype against sample inputs; record explicit rules in docs and Memory Bank.
+- **Spec evolution:** Encapsulate parsing logic to allow new tag handlers; track pending spec questions in `progress.md`.
+
+## 5. Open Questions (Track in Memory Bank)
+1. Should default dictionary separator be omitted from JSON when it is `:`? (Spec unclear without examples.)
+2. How are unordered nested markers (`o`) precisely formatted in source text?
+3. Are unknown tags fatal errors or ignored content?
+
+Resolve these by revisiting the canonical PDF or consulting project stakeholders; keep answers documented for future sessions.
