@@ -6,6 +6,7 @@
 - ✅ Memory Bank initialised with foundational context.
 - ✅ Spec fixtures transcribed; see `docs/spec-examples.md` and `tests/fixtures/`.
 - ✅ TypeScript domain models captured in `src/models.ts` / `src/index.ts`, matching the canonical fixtures.
+- ✅ Python utility `scripts/extract_spec_code.py` implemented to harvest spec code blocks for downstream tooling.
 - ⏳ Parser implementation not started; project scaffolding is the next prerequisite.
 
 ## Upcoming Milestones
