@@ -1,8 +1,7 @@
-# Home © Rinat Abdullin — ERC · SGR · LLM Evals · News · Courses
+Home © Rinat Abdullin
+ERC · SGR · LLM Evals · News · Courses · About
 
-# BizDocumentAI Spec
-
-AI+Coding Kata
+# AI+Coding Kata
 
 AI in Coding helps a lot with high-level tasks like prototyping, reasoning and finding bugs.
 
@@ -10,7 +9,9 @@ Please use your favourite tools (no limitations) to implement as much of this sp
 
 Imagine that your team will have to support this code for a few years, so you want to do a thorough job here.
 
-There are no limits here. If you spot something unusual — use your best judgement.
+There are no limits here. If you spot something unusual - use your best judgement.
+
+## BizDocumentAI Spec
 
 Let's define a simple document format that could describe a contract, procedure, or any other business document in a structured way. It may be used to load this business data into AI Assistants (like in Enterprise RAG Challenge). We’ll work with the documents.
 
@@ -21,21 +22,20 @@ Our documents will consist of blocks. A block is a logical piece of text (like a
 - A list
 - A dictionary
 
-Blocks can contain heterogeneous content — texts, other blocks, dictionaries, etc. Lists can contain only similar block items that also have a number.
+Blocks can contain heterogeneous content—texts, other blocks, dictionaries, etc. Lists can contain only similar block items that also have a number.
 
-## Document Layout
+### Document Layout
 
-The document below describes a simple text format that can be deterministically parsed into JSON objects. This document is also a test suite! Code admonitions always come in pairs: first input and then JSON.
+The document below describes a simple text format that can be deterministically parsed into JSON objects. This document is also a test suite! Code admonitions always come in pairs: first input and then json.
 
 When the parser is implemented, parsed input should always produce output that is structurally similar to the expected JSON. The headline before the code blocks is the name of the text.
 
-## Python Data Structures
+### Python Data Structures
 
 Below is an example of how you might structure your data models in Python using Pydantic:
 
 ```python
-from typing import Dict, List, Literal, Optional, Union
-
+from typing import List, Optional, Union, Dict, Literal
 from pydantic import BaseModel, Field
 
 # This type alias helps with readability and forward references.
@@ -43,20 +43,21 @@ ContentNode = Union[str, "Block", "ListBlock", "Dictionary"]
 
 
 class Dictionary(BaseModel):
-    """A distinct dictionary structure for key-value pairs."""
-
+    """
+    A distinct dictionary structure for key-value pairs.
+    """
     kind: Literal["dict"]
     items: Dict[str, str] = Field(default_factory=dict)
 
 
 class Block(BaseModel):
-    """A general-purpose container for a "section" or item.
-
-    `number` can store a section number (e.g., "5.1") if applicable.
-    `head` is an optional heading for the block.
-    `body` can hold any mix of strings, sub-blocks, dictionaries, or lists.
     """
+    A general-purpose container for a "section" or item.
 
+    - `number` can store a section number (e.g., "5", "5.1") if applicable.
+    - `head` is an optional heading for the block.
+    - `body` can hold any mix of strings, sub-blocks, dictionaries, or lists.
+    """
     kind: Literal["block"]
     number: Optional[str] = None
     head: Optional[str] = None
@@ -64,8 +65,9 @@ class Block(BaseModel):
 
 
 class ListBlock(BaseModel):
-    """A container for a list of items, each item being a `Block`."""
-
+    """
+    A container for a list of items, each item being a `Block`.
+    """
     kind: Literal["list"]
     items: List[Block] = Field(default_factory=list)
 
@@ -84,6 +86,8 @@ Empty text results in an empty document block.
 
 ```text
 ```
+
+_(there is no content)_
 
 #### JSON
 
@@ -104,6 +108,8 @@ First paragraph.
 
 Second paragraph.
 ```
+
+_(An empty line in between)_
 
 #### JSON
 
@@ -178,7 +184,7 @@ Here is a little story
 
 ### Dictionaries
 
-Dictionaries are used to capture key-value pairs. By default, they are separated by `:`.
+Dictionaries are used to capture key-value pairs. By default, they are separated by :.
 
 #### Input
 
@@ -214,7 +220,7 @@ We can also have a non-standard separator and empty values:
 
 ```text
 <dict sep="-">
-Title - AI Coding Kata
+Title - AI Coding - for TAT
 Kata Number -
 </dict>
 ```
@@ -228,7 +234,7 @@ Kata Number -
     {
       "kind": "dict",
       "items": {
-        "Title": "AI Coding Kata",
+        "Title": "AI Coding - for TAT",
         "Kata Number": ""
       }
     }
@@ -242,14 +248,14 @@ Lists are very important! By default, each non-empty line is a list item. They g
 
 There are multiple kinds:
 
-- `.` for ordered lists that are dot-separated
-- `*` for bulleted lists
+- . for ordered lists that are dot-separated
+- * for bulleted lists
 
-Note that the list item's text goes into `head` and the item number goes into `number`.
+Note that the list item’s text goes into head and the item number goes into number.
 
-#### Ordered lists
+#### Ordered Lists
 
-##### Input
+#### Input
 
 ```text
 <list kind=".">
@@ -258,7 +264,7 @@ Note that the list item's text goes into `head` and the item number goes into `n
 </list>
 ```
 
-##### JSON
+#### JSON
 
 ```json
 {
@@ -277,18 +283,18 @@ Note that the list item's text goes into `head` and the item number goes into `n
 
 As a convenience, nested lists are automatically detected:
 
-##### Input
+#### Input
 
 ```text
 <list kind=".">
 1. First
 2. Second
-2.1. Subitem 1
-2.2. Subitem 2
+  2.1. Subitem 1
+  2.2. Subitem 2
 </list>
 ```
 
-##### JSON
+#### JSON
 
 ```json
 {
@@ -326,7 +332,7 @@ As a convenience, nested lists are automatically detected:
 
 We can have unordered lists too:
 
-##### Input
+#### Input
 
 ```text
 <list kind="*">
@@ -336,7 +342,7 @@ We can have unordered lists too:
 </list>
 ```
 
-##### JSON
+#### JSON
 
 ```json
 {
@@ -354,20 +360,20 @@ We can have unordered lists too:
 }
 ```
 
-And nesting can be done with `o`:
+And nesting can be done with "o":
 
-##### Input
+#### Input
 
 ```text
 <list kind="*">
 * First
-o Subitem
+  o Subitem
 * Second
 * Third
 </list>
 ```
 
-##### JSON
+#### JSON
 
 ```json
 {
@@ -397,26 +403,26 @@ o Subitem
 }
 ```
 
-#### Mixed lists
+### Mixed lists
 
 We can mix lists, but we need to designate different types separately with tags.
 
-##### Input
+#### Input
 
 ```text
 <list kind=".">
 1. Beginning
 2. Main
-2.1. Subsection
-<list kind="*">
-* Bullet 1
-* Bullet 2
-</list>
+  2.1. Subsection
+  <list kind="*">
+  * Bullet 1
+  * Bullet 2
+  </list>
 3. Ending
 </list>
 ```
 
-##### JSON
+#### JSON
 
 ```json
 {
@@ -447,17 +453,16 @@ We can mix lists, but we need to designate different types separately with tags.
 }
 ```
 
-#### Lists with content
+### Lists with content
 
 Lists can also have additional content. If something in the current list doesn't match the prefix, then it is treated as a block body:
 
-##### Input
+#### Input
 
 ```text
 <list kind=".">
 1. First
 First body
-
 2. Second
 Some more text
 <dict sep=":">
@@ -467,7 +472,7 @@ Another Key: Another Value
 </list>
 ```
 
-##### JSON
+#### JSON
 
 ```json
 {
@@ -505,8 +510,6 @@ Another Key: Another Value
 }
 ```
 
----
-
 Published: April 06, 2025.
 
-© Rinat Abdullin — About · Archive · Newsletter · ML Product Labs · Legal Notice / Copyright / Privacy Policy
+© Rinat Abdullin About · Archive · Newsletter · ML Product Labs · Legal Notice / Copyright / Privacy Policy
