@@ -1,0 +1,8 @@
+<head>AI Coding Kata</head>
+Let's get started with the kata
+<block>
+
+<head>Preface</head>
+
+Here is a little story
+</block>

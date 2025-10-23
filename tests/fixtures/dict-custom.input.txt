@@ -1,0 +1,4 @@
+<dict sep="-">
+Title - AI Coding - for TAT
+Kata Number -
+</dict>

@@ -1,0 +1,11 @@
+<list kind=".">
+1. Beginning
+
+2. Main
+<list kind="*">
+* Bullet 1
+* Bullet 2
+</list>
+
+3. Ending
+</list>

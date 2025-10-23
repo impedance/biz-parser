@@ -1,14 +1,12 @@
 # Active Context — BizDocument Parser
 
 ## Current Focus
-- Repository setup centered on documentation (`AGENTS.md`, `PRD.md`, `plan.md`); parser code not yet started.
-- Memory Bank initialised to track persistent knowledge.
-- Next immediate milestone (per plan Phase A): transcribe BizDocumentAI spec examples into fixtures and create `docs/spec-examples.md`.
+- BizDocumentAI examples transcribed into fixtures under `tests/fixtures/` with a consolidated reference in `docs/spec-examples.md`.
+- Preparing to move into Phase B of the plan (domain model alignment) using the captured fixtures as ground truth.
 
 ## Recent Decisions
-- Retain `requirements.pdf`, `PRD.md`, and `plan.md` as canonical references alongside the Memory Bank.
-- Dictionaries will output ordered entry arrays and include the separator value (needs confirmation once examples are captured).
+- Fixture outputs mirror the PDF exactly: dictionary items are emitted as key/value objects without an explicit separator field, even when non-default separators are used.
+- Nested unordered markers (`o`) are represented as nested lists attached to the parent bullet item.
 
 ## Open Questions
-- Confirm precise formatting of unordered nested list markers (`o`) from the spec examples.
-- Determine whether default dictionary separator `:` should be persisted explicitly in JSON output.
+- Confirm whether additional metadata (e.g., list marker kind) should be exposed in the JSON model beyond what the spec examples show.

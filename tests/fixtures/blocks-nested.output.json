@@ -1,0 +1,14 @@
+{
+  "kind": "block",
+  "head": "AI Coding Kata",
+  "body": [
+    "Let's get started with the kata",
+    {
+      "kind": "block",
+      "head": "Preface",
+      "body": [
+        "Here is a little story"
+      ]
+    }
+  ]
+}
